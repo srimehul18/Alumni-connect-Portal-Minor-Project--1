@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Enhanced color scheme with refined design tokens */
+
 :root {
   --background: oklch(0.985 0.002 250);
   --foreground: oklch(0.145 0.01 250);
@@ -138,7 +138,7 @@
 }
 
 @layer base {
-  /* Enhanced typography scale and spacing system for modern design */
+
   :root {
     --font-size-xs: 0.75rem; /* 12px */
     --font-size-sm: 0.875rem; /* 14px */
@@ -183,7 +183,7 @@
     --shadow-elevation-3: 0 8px 32px oklch(0 0 0 / 0.12);
   }
 
-  /* Enhanced heading styles with better hierarchy */
+ 
   h1,
   .h1 {
     font-size: var(--font-size-5xl);
@@ -234,7 +234,7 @@
     margin-bottom: var(--spacing-sm);
   }
 
-  /* Body text and paragraph styles */
+
   body {
     @apply bg-background text-foreground;
     font-size: var(--font-size-base);
@@ -253,7 +253,7 @@
     line-height: var(--line-height-normal);
   }
 
-  /* Enhanced list styles */
+
   ul,
   ol {
     margin-bottom: var(--spacing-md);
@@ -264,7 +264,7 @@
     margin-bottom: var(--spacing-sm);
   }
 
-  /* Improved link styling with consistent states */
+
   a {
     color: var(--primary);
     text-decoration: none;
@@ -287,9 +287,9 @@
   }
 }
 
-/* Enhanced utility classes for polished UI */
+
 @layer utilities {
-  /* Glassmorphism */
+
   .glass {
     @apply bg-card/80 backdrop-blur-xl border border-border/50;
   }
@@ -298,7 +298,7 @@
     @apply bg-card/60 backdrop-blur-md border border-border/30;
   }
 
-  /* Enhanced card hover with more dramatic effects */
+
   .card-hover {
     @apply transition-all duration-500 ease-out;
     transform-style: preserve-3d;
@@ -308,7 +308,7 @@
     @apply shadow-xl shadow-primary/10 -translate-y-2 border-primary/30;
   }
 
-  /* Magnetic hover effect for buttons */
+ 
   .magnetic-hover {
     @apply transition-all duration-300 ease-out;
   }
@@ -321,7 +321,7 @@
     @apply scale-95;
   }
 
-  /* New ripple effect for buttons */
+ 
   .ripple-hover {
     position: relative;
     overflow: hidden;
@@ -345,7 +345,6 @@
     height: 300%;
   }
 
-  /* Glow effect on hover */
   .glow-hover {
     @apply transition-all duration-500;
     position: relative;
@@ -368,7 +367,7 @@
     filter: blur(15px);
   }
 
-  /* Enhanced glow with pulsing animation */
+ 
   .glow-pulse {
     @apply transition-all duration-500;
     position: relative;
@@ -391,7 +390,7 @@
     animation: glowPulse 2s ease-in-out infinite;
   }
 
-  /* Tilt effect on hover */
+
   .tilt-hover {
     @apply transition-transform duration-300 ease-out;
     transform-style: preserve-3d;

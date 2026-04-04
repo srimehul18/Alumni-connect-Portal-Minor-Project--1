@@ -40,7 +40,7 @@ export default function SignUpPage() {
       return
     }
 
-    // get role selected earlier
+
     const role = localStorage.getItem("selectedRole") || "student"
 
     try {

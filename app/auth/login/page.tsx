@@ -44,9 +44,6 @@ export default function LoginPage() {
     }
   }
 
-  // ---------------------------
-  // GOOGLE OAUTH LOGIN ✅
-  // ---------------------------
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError(null)
@@ -62,7 +59,7 @@ export default function LoginPage() {
       setError(error.message)
       setIsLoading(false)
     }
-    // success → redirect handled by Supabase + callback route
+
   }
 
   return (
@@ -122,14 +119,13 @@ export default function LoginPage() {
               </div>
             </form>
 
-            {/* 🔹 Divider */}
             <div className="my-6 flex items-center gap-2">
               <div className="h-px flex-1 bg-border" />
               <span className="text-xs text-muted-foreground">OR</span>
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            {/* 🔹 GOOGLE LOGIN BUTTON */}
+
             <Button
               type="button"
               variant="outline"
