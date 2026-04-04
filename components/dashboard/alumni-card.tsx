@@ -80,9 +80,11 @@ export function AlumniCard({ alumni, isSaved, onSave, onUnsave }: AlumniCardProp
       student_id: user.id,
       alumni_id: alumni.id,
       message: "I would like mentorship guidance.",
+      status: "pending",
     })
 
     if (error) {
+      console.error("Mentorship request error:", error)
       toast.error("Failed to send mentorship request")
     } else {
       toast.success("Mentorship request sent!")
@@ -197,134 +199,134 @@ export function AlumniCard({ alumni, isSaved, onSave, onUnsave }: AlumniCardProp
         </CardContent>
 
         <CardFooter className="flex gap-2 pt-3 border-t bg-muted/30">
-  <Dialog open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen}>
-    <DialogTrigger asChild>
-      <Button variant="ghost" size="sm" className="flex-1 elastic-hover group/btn">
-        <Eye className="mr-2 h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
-        Quick View
-      </Button>
-    </DialogTrigger>
+          <Dialog open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="flex-1 elastic-hover group/btn">
+                <Eye className="mr-2 h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
+                Quick View
+              </Button>
+            </DialogTrigger>
 
-    <DialogContent className="sm:max-w-lg animate-in-scale">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 ring-2 ring-primary/20">
-            <AvatarImage src={alumni.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {alumni.full_name?.charAt(0) || "A"}
-            </AvatarFallback>
-          </Avatar>
+            <DialogContent className="sm:max-w-lg animate-in-scale">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                    <AvatarImage src={alumni.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {alumni.full_name?.charAt(0) || "A"}
+                    </AvatarFallback>
+                  </Avatar>
 
-          <div>
-            <div className="flex items-center gap-2">
-              {alumni.full_name}
-              {alumni.is_verified && (
-                <Badge variant="secondary" className="text-xs">
-                  Verified
-                </Badge>
-              )}
-            </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {alumni.full_name}
+                      {alumni.is_verified && (
+                        <Badge variant="secondary" className="text-xs">
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
 
-            {alumniProfile?.job_title && alumniProfile?.company && (
-              <p className="text-sm font-normal text-muted-foreground">
-                {alumniProfile.job_title} at {alumniProfile.company}
-              </p>
+                    {alumniProfile?.job_title && alumniProfile?.company && (
+                      <p className="text-sm font-normal text-muted-foreground">
+                        {alumniProfile.job_title} at {alumniProfile.company}
+                      </p>
+                    )}
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-4">
+                {alumniProfile?.bio && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-1">About</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {alumniProfile.bio}
+                    </p>
+                  </div>
+                )}
+
+                {alumniProfile?.branch && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    {alumniProfile.branch} - Class of {alumniProfile.graduation_year}
+                  </div>
+                )}
+
+                {alumniProfile?.skills && alumniProfile.skills.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Skills</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {alumniProfile.skills.map((skill) => (
+                        <Badge key={skill} variant="secondary" className="text-xs elastic-hover">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {alumniProfile?.is_mentor_available && alumniProfile?.mentorship_areas && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Mentorship Areas</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {alumniProfile.mentorship_areas.map((area) => (
+                        <Badge key={area} variant="outline" className="text-xs elastic-hover">
+                          {area}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-2">
+                  <Button className="flex-1 magnetic-hover glow-hover" asChild>
+                    <Link href={`/dashboard/alumni/${alumni.id}`}>
+                      View Full Profile
+                    </Link>
+                  </Button>
+
+                  <Button variant="outline" asChild className="elastic-hover bg-transparent">
+                    <Link href={`/dashboard/messages?to=${alumni.id}`}>
+                      <MessageSquare className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* NEW: Mentorship Request Button */}
+          {alumniProfile?.is_mentor_available && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleRequestMentorship}
+              disabled={isRequesting}
+              className="elastic-hover"
+            >
+              {isRequesting ? "Sending..." : "Request Mentorship"}
+            </Button>
+          )}
+
+          {/* Existing Save Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "transition-all duration-300 pop-hover",
+              isSaved && "border-primary/50 bg-primary/5 text-primary",
             )}
-          </div>
-        </DialogTitle>
-      </DialogHeader>
-
-      <div className="space-y-4 pt-4">
-        {alumniProfile?.bio && (
-          <div>
-            <h4 className="text-sm font-medium mb-1">About</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {alumniProfile.bio}
-            </p>
-          </div>
-        )}
-
-        {alumniProfile?.branch && (
-          <div className="flex items-center gap-2 text-sm">
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            {alumniProfile.branch} - Class of {alumniProfile.graduation_year}
-          </div>
-        )}
-
-        {alumniProfile?.skills && alumniProfile.skills.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-2">Skills</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {alumniProfile.skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="text-xs elastic-hover">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {alumniProfile?.is_mentor_available && alumniProfile?.mentorship_areas && (
-          <div>
-            <h4 className="text-sm font-medium mb-2">Mentorship Areas</h4>
-            <div className="flex flex-wrap gap-1.5">
-              {alumniProfile.mentorship_areas.map((area) => (
-                <Badge key={area} variant="outline" className="text-xs elastic-hover">
-                  {area}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-2 pt-2">
-          <Button className="flex-1 magnetic-hover glow-hover" asChild>
-            <Link href={`/dashboard/alumni/${alumni.id}`}>
-              View Full Profile
-            </Link>
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaved ? (
+              <BookmarkCheck className="h-4 w-4 text-primary animate-in-scale" />
+            ) : (
+              <Bookmark className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+            )}
           </Button>
-
-          <Button variant="outline" asChild className="elastic-hover bg-transparent">
-            <Link href={`/dashboard/messages?to=${alumni.id}`}>
-              <MessageSquare className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </DialogContent>
-  </Dialog>
-
-  {/* NEW: Mentorship Request Button */}
-  {alumniProfile?.is_mentor_available && (
-    <Button
-      variant="default"
-      size="sm"
-      onClick={handleRequestMentorship}
-      disabled={isRequesting}
-      className="elastic-hover"
-    >
-      {isRequesting ? "Sending..." : "Request Mentorship"}
-    </Button>
-  )}
-
-  {/* Existing Save Button */}
-  <Button
-    variant="outline"
-    size="icon"
-    className={cn(
-      "transition-all duration-300 pop-hover",
-      isSaved && "border-primary/50 bg-primary/5 text-primary",
-    )}
-    onClick={handleSave}
-    disabled={isSaving}
-  >
-    {isSaved ? (
-      <BookmarkCheck className="h-4 w-4 text-primary animate-in-scale" />
-    ) : (
-      <Bookmark className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-    )}
-  </Button>
-</CardFooter>
+        </CardFooter>
 
       </Card>
     </>

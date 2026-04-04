@@ -17,11 +17,15 @@ import { createClient } from "@/lib/supabase/client"
 import type { Profile, AlumniProfile } from "@/lib/types"
 import { BRANCHES, SKILLS, GRADUATION_YEARS } from "@/lib/constants"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/app/auth/supabaseClient"
+import { toast } from "../ui/use-toast"
 
 interface AlumniProfileFormProps {
   profile: Profile
   alumniProfile: AlumniProfile | null
 }
+
+
 
 export function AlumniProfileForm({ profile, alumniProfile }: AlumniProfileFormProps) {
   const router = useRouter()
@@ -43,6 +47,8 @@ export function AlumniProfileForm({ profile, alumniProfile }: AlumniProfileFormP
     mentorship_areas: alumniProfile?.mentorship_areas || [],
     max_mentees: alumniProfile?.max_mentees?.toString() || "3",
   })
+
+  
   const [newSkill, setNewSkill] = useState("")
   const [newExpertise, setNewExpertise] = useState("")
   const [newMentorshipArea, setNewMentorshipArea] = useState("")
@@ -115,15 +121,41 @@ export function AlumniProfileForm({ profile, alumniProfile }: AlumniProfileFormP
       updated_at: new Date().toISOString(),
     }
 
-    if (alumniProfile) {
-      await supabase.from("alumni_profiles").update(alumniData).eq("id", alumniProfile.id)
-    } else {
-      await supabase.from("alumni_profiles").insert(alumniData)
-    }
+    // 1. Update profile
+const { error: profileError } = await supabase
+  .from("profiles")
+  .update({
+    full_name: formData.full_name,
+    avatar_url: formData.avatar_url,
+  })
+  .eq("id", profile.id)
+
+if (profileError) {
+  console.error("PROFILE UPDATE ERROR:", profileError)
+  // toast.error("Failed to update profile")
+  // setLoading(false)
+  return
+}
+
+
+// 2. UPSERT alumni profile (IMPORTANT FIX)
+const { error: alumniError } = await supabase
+  .from("alumni_profiles")
+  .upsert(alumniData, { onConflict: "user_id" })
+
+if (alumniError) {
+  console.error("ALUMNI UPSERT ERROR:", alumniError)
+  // toast.error("Failed to save alumni profile")
+  // setLoading(false)
+  return
+}
+    
 
     setIsLoading(false)
     router.refresh()
   }
+
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
