@@ -30,10 +30,12 @@ export function MentorshipList({ requests: initialRequests, userRole }: Mentorsh
 
     const { error } = await supabase
       .from("mentorship_requests")
-      .update({ status, updated_at: new Date().toISOString() })
+      .update({ status })
       .eq("id", requestId)
 
-    if (!error) {
+    if (error) {
+      console.error("UPDATE ERROR:", error)
+    } else {
       setRequests(requests.map((r) => (r.id === requestId ? { ...r, status } : r)))
     }
 
