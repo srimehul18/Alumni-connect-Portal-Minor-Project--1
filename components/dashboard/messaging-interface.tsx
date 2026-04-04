@@ -34,11 +34,40 @@ export function MessagingInterface({ currentUserId, contacts, initialContactId }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  useEffect(() => {
-    if (selectedContact) {
-      loadMessages(selectedContact.id)
-    }
-  }, [selectedContact])
+useEffect(() => {
+  if (!selectedContact) return
+
+  loadMessages(selectedContact.id)
+
+  const supabase = createClient()
+
+  const channel = supabase
+    .channel("messages-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      },
+      (payload) => {
+        const newMsg = payload.new as Message
+
+        // Only add if it belongs to current chat
+        if (
+          (newMsg.sender_id === currentUserId && newMsg.receiver_id === selectedContact.id) ||
+          (newMsg.sender_id === selectedContact.id && newMsg.receiver_id === currentUserId)
+        ) {
+          setMessages((prev) => [...prev, newMsg])
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [selectedContact])
 
   useEffect(() => {
     scrollToBottom()
@@ -68,30 +97,40 @@ export function MessagingInterface({ currentUserId, contacts, initialContactId }
     setIsLoading(false)
   }
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !selectedContact) return
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!newMessage.trim() || !selectedContact) return
 
-    setIsSending(true)
-    const supabase = createClient()
+  setIsSending(true)
+  const supabase = createClient()
 
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
+  const { error } = await supabase
+    .from("messages")
+    .insert({
+      sender_id: currentUserId,
+      receiver_id: selectedContact.id,
+      message: newMessage.trim(),
+    })
+
+  if (!error) {
+    setMessages([
+      ...messages,
+      {
+        id: Date.now().toString(),
         sender_id: currentUserId,
         receiver_id: selectedContact.id,
-        content: newMessage.trim(),
-      })
-      .select()
-      .single()
-
-    if (!error && data) {
-      setMessages([...messages, data])
-      setNewMessage("")
-    }
-
-    setIsSending(false)
+        message: newMessage.trim(),
+        created_at: new Date().toISOString(),
+        is_read: false,
+      },
+    ])
+    setNewMessage("")
+  } else {
+    console.error("SEND ERROR:", error)
   }
+
+  setIsSending(false)
+}
 
   return (
     <div className="grid h-[calc(100vh-220px)] gap-4 lg:grid-cols-3">
@@ -179,7 +218,7 @@ export function MessagingInterface({ currentUserId, contacts, initialContactId }
                             message.sender_id === currentUserId ? "bg-primary text-primary-foreground" : "bg-muted",
                           )}
                         >
-                          <p className="text-sm">{message.content}</p>
+                          <p className="text-sm">{message.message}</p>
                           <p
                             className={cn(
                               "mt-1 text-xs",
@@ -225,4 +264,4 @@ export function MessagingInterface({ currentUserId, contacts, initialContactId }
       </Card>
     </div>
   )
-}
+  }
