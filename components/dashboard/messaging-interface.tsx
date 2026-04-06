@@ -113,18 +113,31 @@ const handleSendMessage = async (e: React.FormEvent) => {
     })
 
   if (!error) {
-    setMessages([
-      ...messages,
-      {
-        id: Date.now().toString(),
-        sender_id: currentUserId,
-        receiver_id: selectedContact.id,
-        message: newMessage.trim(),
-        created_at: new Date().toISOString(),
-        is_read: false,
-      },
-    ])
-    setNewMessage("")
+
+  // ✅ ADD THIS NOTIFICATION BLOCK HERE
+  await supabase.from("notifications").insert({
+    user_id: selectedContact.id,
+    title: "New Message",
+    message: "You received a new message",
+    type: "message",
+    link: `/dashboard/messages?to=${currentUserId}`,
+  })
+
+  // existing UI update
+  setMessages([
+    ...messages,
+    {
+      id: Date.now().toString(),
+      sender_id: currentUserId,
+      receiver_id: selectedContact.id,
+      message: newMessage.trim(),
+      created_at: new Date().toISOString(),
+      is_read: false,
+    },
+  ])
+
+  setNewMessage("")
+
   } else {
     console.error("SEND ERROR:", error)
   }

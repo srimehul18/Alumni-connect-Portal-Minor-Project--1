@@ -85,7 +85,7 @@ export interface Notification {
   message: string
   type: "mentorship" | "opportunity" | "system" | "message"
   is_read: boolean
-  link: string | null
+  link?: string | null
   created_at: string
 }
 
