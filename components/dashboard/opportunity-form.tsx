@@ -51,63 +51,84 @@ export function OpportunityForm({ userId, opportunity }: OpportunityFormProps) {
     setFormData({ ...formData, skills_required: formData.skills_required.filter((s) => s !== skill) })
   }
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setIsLoading(true)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
 
-  const supabase = createClient()
+    const supabase = createClient()
 
-  const opportunityData = {
-    created_by: userId, // ✅ FIXED
-    title: formData.title,
-    description: formData.description,
-    company: formData.company,
-    location: formData.location || null,
-    type: formData.type as "job" | "internship",
-    experience_level: formData.experience_level as "entry" | "mid" | "senior" | "any",
+    const opportunityData = {
+      created_by: userId, // ✅ FIXED
+      title: formData.title,
+      description: formData.description,
+      company: formData.company,
+      location: formData.location || null,
+      type: formData.type as "job" | "internship",
+      experience_level: formData.experience_level as "entry" | "mid" | "senior" | "any",
 
-    // ✅ FIXED FIELD NAME
-    skills: formData.skills_required,
+      // ✅ FIXED FIELD NAME
+      skills: formData.skills_required,
 
-    salary_range: formData.salary_range || null,
-    application_url: formData.application_url || null,
+      salary_range: formData.salary_range || null,
+      application_url: formData.application_url || null,
 
-    // ✅ FIXED FIELD NAME + FORMAT
-    application_deadline: formData.deadline || null,
+      // ✅ FIXED FIELD NAME + FORMAT
+      application_deadline: formData.deadline || null,
 
-    is_active: formData.is_active,
-    updated_at: new Date().toISOString(),
+      is_active: formData.is_active,
+      updated_at: new Date().toISOString(),
+    }
+
+    console.log("SENDING DATA:", opportunityData) // 🔥 debug
+
+    let error
+
+    if (opportunity) {
+      const res = await supabase
+        .from("opportunities")
+        .update(opportunityData)
+        .eq("id", opportunity.id)
+
+      error = res.error
+    } else {
+      const res = await supabase
+        .from("opportunities")
+        .insert(opportunityData)
+
+      error = res.error
+
+      if (!error) {
+
+  const { data: users } = await supabase
+    .from("profiles")
+    .select("id")
+    .neq("id", userId) // optional: exclude yourself
+
+  // ✅ STEP 2: insert notifications for all
+  if (users && users.length > 0) {
+    await supabase.from("notifications").insert(
+      users.map((u) => ({
+        user_id: u.id,
+        title: "New Opportunity",
+        message: `${formData.title} posted at ${formData.company}`,
+        type: "opportunity",
+        link: "/dashboard/opportunities",
+      }))
+    )
   }
-
-  console.log("SENDING DATA:", opportunityData) // 🔥 debug
-
-  let error
-
-  if (opportunity) {
-    const res = await supabase
-      .from("opportunities")
-      .update(opportunityData)
-      .eq("id", opportunity.id)
-
-    error = res.error
-  } else {
-    const res = await supabase
-      .from("opportunities")
-      .insert(opportunityData)
-
-    error = res.error
-  }
-
-  if (error) {
-    console.error("INSERT ERROR:", error)
-    setIsLoading(false)
-    return
-  }
-
-  setIsLoading(false)
-  router.push("/dashboard/opportunities")
-  router.refresh()
 }
+    }
+
+    if (error) {
+      console.error("INSERT ERROR:", error)
+      setIsLoading(false)
+      return
+    }
+
+    setIsLoading(false)
+    router.push("/dashboard/opportunities")
+    router.refresh()
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -172,13 +193,13 @@ const handleSubmit = async (e: React.FormEvent) => {
               <Label htmlFor="experience_level">Experience Level</Label>
               <Select
                 value={formData.experience_level}
-                
-onValueChange={(value) =>
-  setFormData({
-    ...formData,
-    experience_level: value as "entry" | "mid" | "senior" | "any",
-  })
-}              >
+
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    experience_level: value as "entry" | "mid" | "senior" | "any",
+                  })
+                }              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

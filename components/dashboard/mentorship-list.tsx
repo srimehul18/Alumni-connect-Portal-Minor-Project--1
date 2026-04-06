@@ -39,7 +39,6 @@ export function MentorshipList({ requests: initialRequests, userRole }: Mentorsh
   // update UI
   setRequests(requests.map((r) => (r.id === requestId ? { ...r, status } : r)))
 
-  // ✅ ADD THIS (ONLY FOR ACCEPTED)
   if (status === "accepted") {
     const request = requests.find((r) => r.id === requestId)
 
