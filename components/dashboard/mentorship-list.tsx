@@ -36,8 +36,24 @@ export function MentorshipList({ requests: initialRequests, userRole }: Mentorsh
     if (error) {
       console.error("UPDATE ERROR:", error)
     } else {
-      setRequests(requests.map((r) => (r.id === requestId ? { ...r, status } : r)))
+  // update UI
+  setRequests(requests.map((r) => (r.id === requestId ? { ...r, status } : r)))
+
+  // ✅ ADD THIS (ONLY FOR ACCEPTED)
+  if (status === "accepted") {
+    const request = requests.find((r) => r.id === requestId)
+
+    if (request) {
+      await supabase.from("notifications").insert({
+        user_id: request.student_id, // VERY IMPORTANT
+        title: "Mentorship Accepted 🎉",
+        message: "Your mentorship request has been accepted",
+        type: "mentorship",
+        link: "/dashboard/mentorship",
+      })
     }
+  }
+}
 
     setLoadingId(null)
   }
