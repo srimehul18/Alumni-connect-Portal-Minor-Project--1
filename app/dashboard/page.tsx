@@ -123,7 +123,13 @@ totalUsers = usersRes.count || 0
 pendingVerification = pendingRes.count || 0
 activeOpportunities = opportunitiesRes.count || 0
 mentorshipsCount = mentorshipRes.count || 0
+const { count } = await supabase
+  .from("messages")
+  .select("id", { count: "exact", head: true })
+  .eq("receiver_id", user.id)
+  .eq("is_read", false)
 
+unreadMessages = count || 0
   try {
     const [alumniRes, opportunitiesRes, mentorshipRes, messagesRes] = await Promise.all([
   supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "alumni"),
@@ -136,7 +142,13 @@ mentorshipsCount = mentorshipRes.count || 0
     .select("id", { count: "exact", head: true })
     .eq("receiver_id", user.id)
     .eq("is_read", false),
+
+    
 ])
+
+const { count: totalMessages } = await supabase
+  .from("messages")
+  .select("id", { count: "exact", head: true })
 
     alumniCount = alumniRes.count || 0
     opportunitiesCount = opportunitiesRes.count || 0
@@ -205,6 +217,7 @@ mentorshipsCount = mentorshipRes.count || 0
     mentorshipCount={alumniMentorshipCount || 0}
     opportunitiesCount={postedOpportunitiesCount || 0}
     pendingCount={pendingMentorshipCount || 0}
+    unreadMessages={unreadMessages}
   />
 )
 
@@ -348,7 +361,7 @@ function AlumniDashboardOverview({
   mentorshipCount: number
   opportunitiesCount: number
   pendingCount: number
-  unreadMessages?: number
+  unreadMessages: number
 }) {
   return (
     <div className="space-y-6 animate-in-up">
@@ -375,7 +388,7 @@ function AlumniDashboardOverview({
           description="Jobs & internships"
           variant="info"
         />
-        <StatsCard title="Messages" value={0} icon="message-square" description="Unread messages" variant="warning" />
+        <StatsCard title="Messages" value={unreadMessages} icon="message-square" description="Unread messages" variant="warning" />
       </div>
 
       <Card className="overflow-hidden">
@@ -410,6 +423,7 @@ function AdminDashboardOverview({
   pendingVerification: number
   activeOpportunities: number
   mentorshipsCount: number
+  totalMessages?: number
 }) {
   return (
     <div className="space-y-6 animate-in-up">

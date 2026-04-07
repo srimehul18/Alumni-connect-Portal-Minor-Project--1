@@ -18,6 +18,12 @@ export default async function NotificationsPage() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
+    await supabase
+  .from("notifications")
+  .update({ is_read: true })
+  .eq("user_id", user.id)
+  .eq("is_read", false)
+
   return (
     <div className="space-y-6">
       <div>

@@ -34,40 +34,62 @@ export function MessagingInterface({ currentUserId, contacts, initialContactId }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-useEffect(() => {
-  if (!selectedContact) return
+  useEffect(() => {
+    if (!selectedContact) return
 
-  loadMessages(selectedContact.id)
+    loadMessages(selectedContact.id)
 
-  const supabase = createClient()
+    const supabase = createClient()
 
-  const channel = supabase
-    .channel("messages-realtime")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-      },
-      (payload) => {
-        const newMsg = payload.new as Message
+    const channel = supabase
+      .channel("messages-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          const newMsg = payload.new as Message
 
-        // Only add if it belongs to current chat
-        if (
-          (newMsg.sender_id === currentUserId && newMsg.receiver_id === selectedContact.id) ||
-          (newMsg.sender_id === selectedContact.id && newMsg.receiver_id === currentUserId)
-        ) {
-          setMessages((prev) => [...prev, newMsg])
+          // Only add if it belongs to current chat
+          if (
+            (newMsg.sender_id === currentUserId && newMsg.receiver_id === selectedContact.id) ||
+            (newMsg.sender_id === selectedContact.id && newMsg.receiver_id === currentUserId)
+          ) {
+            setMessages((prev) => {
+  // if message is from other person → mark as read instantly
+  if (
+  newMsg.sender_id === selectedContact.id &&
+  newMsg.receiver_id === currentUserId
+) {
+  // update DB
+  supabase
+    .from("messages")
+    .update({ is_read: true })
+    .eq("id", newMsg.id)
+
+  // update UI
+  setMessages((prev) => [
+    ...prev,
+    { ...newMsg, is_read: true }
+  ])
+} else {
+  setMessages((prev) => [...prev, newMsg])
+}
+
+  return [...prev, newMsg]
+})
+          }
         }
-      }
-    )
-    .subscribe()
+      )
+      .subscribe()
 
-  return () => {
-    supabase.removeChannel(channel)
-  }
-}, [selectedContact])
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [selectedContact])
 
   useEffect(() => {
     scrollToBottom()
@@ -93,58 +115,65 @@ useEffect(() => {
       .update({ is_read: true })
       .eq("sender_id", contactId)
       .eq("receiver_id", currentUserId)
+      .eq("is_read", false)
+
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.sender_id === contactId ? { ...msg, is_read: true } : msg
+      )
+    )
 
     setIsLoading(false)
   }
 
-const handleSendMessage = async (e: React.FormEvent) => {
-  e.preventDefault()
-  if (!newMessage.trim() || !selectedContact) return
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newMessage.trim() || !selectedContact) return
 
-  setIsSending(true)
-  const supabase = createClient()
+    setIsSending(true)
+    const supabase = createClient()
 
-  const { error } = await supabase
-    .from("messages")
-    .insert({
-      sender_id: currentUserId,
-      receiver_id: selectedContact.id,
-      message: newMessage.trim(),
-      is_read: false,
-    })
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        sender_id: currentUserId,
+        receiver_id: selectedContact.id,
+        message: newMessage.trim(),
+        is_read: false,
+      })
 
-  if (!error) {
+    if (!error) {
 
-  // ✅ ADD THIS NOTIFICATION BLOCK HERE
-  await supabase.from("notifications").insert({
-    user_id: selectedContact.id,
-    title: "New Message",
-    message: "You received a new message",
-    type: "message",
-    link: `/dashboard/messages?to=${currentUserId}`,
-  })
 
-  // existing UI update
-  setMessages([
-    ...messages,
-    {
-      id: Date.now().toString(),
-      sender_id: currentUserId,
-      receiver_id: selectedContact.id,
-      message: newMessage.trim(),
-      created_at: new Date().toISOString(),
-      is_read: false,
-    },
-  ])
+      await supabase.from("notifications").insert({
+        user_id: selectedContact.id,
+        title: "New Message",
+        message: "You received a new message",
+        type: "message",
+        link: `/dashboard/messages?to=${currentUserId}`,
+      })
 
-  setNewMessage("")
+      // existing UI update
+      setMessages([
+        ...messages,
+        {
+          id: Date.now().toString(),
+          sender_id: currentUserId,
+          receiver_id: selectedContact.id,
+          message: newMessage.trim(),
+          created_at: new Date().toISOString(),
+          is_read: false,
+        },
+      ])
 
-  } else {
-    console.error("SEND ERROR:", error)
+      setNewMessage("")
+
+    } else {
+      console.error("SEND ERROR:", error)
+    }
+
+    setIsSending(false)
   }
-
-  setIsSending(false)
-}
 
   return (
     <div className="grid h-[calc(100vh-220px)] gap-4 lg:grid-cols-3">
@@ -278,4 +307,4 @@ const handleSendMessage = async (e: React.FormEvent) => {
       </Card>
     </div>
   )
-  }
+}
