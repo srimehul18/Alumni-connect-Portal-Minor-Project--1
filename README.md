@@ -6,7 +6,7 @@
 
 ## 🚀 Live Demo  
 
-🔗 https://your-project-link.vercel.app  
+🔗 
 
 ---
 
@@ -117,7 +117,7 @@ This project is built with a modern tech stack and focuses on delivering a clean
 ### 1. Clone the Repository  
 
 ```bash
-git clone https://github.com/your-username/student-alumni-portal.git
+git clone
 cd student-alumni-portal
 ```
 
@@ -150,19 +150,11 @@ npx prisma generate
 npm run dev
 ```
 
-👉 Open: http://localhost:3000  
+👉 Open:  
 
 ---
 
-## 📸 Screenshots  
 
-- Landing Page  
-- Dashboard  
-- Alumni Profiles  
-- Search & Filters  
-- Admin Panel  
-
----
 
 ## 🧪 Testing  
 
@@ -214,8 +206,8 @@ This project is licensed under the MIT License.
 
 **Your Name**  
 
-- GitHub: https://github.com/your-username  
-- LinkedIn: https://linkedin.com/in/your-profile  
+- GitHub:  
+- LinkedIn:
 
 ---
 
