@@ -43,6 +43,7 @@ const studentNavItems = [
 
 const alumniNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {href: "/dashboard/community", label: "Community", icon: MessageSquare},
   { href: "/dashboard/mentorship", label: "Mentorship Requests", icon: UserPlus },
   { href: "/dashboard/opportunities", label: "My Opportunities", icon: Briefcase },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
@@ -51,6 +52,7 @@ const alumniNavItems = [
 
 const adminNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {href: "/dashboard/community", label: "Community", icon: MessageSquare},
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/users", label: "Manage Users", icon: Users },
   { href: "/dashboard/verify", label: "Verify Alumni", icon: Shield },
