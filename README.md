@@ -6,7 +6,7 @@
 
 ## 🚀 Live Demo  
 
-🔗 
+🔗 https://alumni-connect-portal-minor-project.vercel.app/
 
 ---
 
@@ -117,7 +117,7 @@ This project is built with a modern tech stack and focuses on delivering a clean
 ### 1. Clone the Repository  
 
 ```bash
-git clone
+git clone https://github.com/srimehul18/Alumni-connect-Portal-Minor-Project--1
 cd student-alumni-portal
 ```
 
@@ -206,7 +206,7 @@ This project is licensed under the MIT License.
 
 **Your Name**  
 
-- GitHub:  
+- GitHub: https://github.com/srimehul18/Alumni-connect-Portal-Minor-Project--1
 - LinkedIn:
 
 ---
