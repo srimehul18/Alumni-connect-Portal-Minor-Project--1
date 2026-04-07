@@ -110,6 +110,7 @@ const handleSendMessage = async (e: React.FormEvent) => {
       sender_id: currentUserId,
       receiver_id: selectedContact.id,
       message: newMessage.trim(),
+      is_read: false,
     })
 
   if (!error) {

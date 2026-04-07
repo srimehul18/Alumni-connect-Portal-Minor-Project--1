@@ -6,7 +6,7 @@ import { OpportunityCard } from "@/components/dashboard/opportunity-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, ArrowRight} from "lucide-react"
+import { AlertCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import type { AlumniWithProfile, Opportunity, Profile } from "@/lib/types"
 
@@ -37,8 +37,8 @@ export default async function DashboardPage() {
   // If database error, show setup message
 
   if (!profile) {
-  redirect("/auth/complete-profile")
-}
+    redirect("/auth/complete-profile")
+  }
 
   if (dbError) {
     return (
@@ -67,20 +67,81 @@ export default async function DashboardPage() {
 
   let alumniCount = 0
   let opportunitiesCount = 0
+  let unreadMessages = 0
   let mentorshipCount = 0
   let recommendedAlumni: AlumniWithProfile[] = []
   let latestOpportunities: Opportunity[] = []
 
+  const { count: alumniMentorshipCount } = await supabase
+    .from("mentorship_requests")
+    .select("*", { count: "exact", head: true })
+    .eq("alumni_id", user.id)
+
+  const { count: postedOpportunitiesCount } = await supabase
+    .from("opportunities")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+
+  const { count: pendingMentorshipCount } = await supabase
+  .from("mentorship_requests")
+  .select("*", { count: "exact", head: true })
+  .eq("alumni_id", user.id)
+  .eq("status", "pending")
+
+const [usersRes, pendingRes, opportunitiesRes, mentorshipRes] = await Promise.all([
+  // ✅ Total users
+  supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true }),
+
+  // ✅ Pending alumni verification
+  supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "alumni")
+    .eq("is_verified", false),
+
+  // ✅ Active opportunities
+  supabase
+    .from("opportunities")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true),
+
+  // ✅ Accepted mentorships
+  supabase
+    .from("mentorship_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "accepted"),
+])
+
+let totalUsers = 0
+let pendingVerification = 0
+let activeOpportunities = 0
+let mentorshipsCount = 0
+
+totalUsers = usersRes.count || 0
+pendingVerification = pendingRes.count || 0
+activeOpportunities = opportunitiesRes.count || 0
+mentorshipsCount = mentorshipRes.count || 0
+
   try {
-    const [alumniRes, opportunitiesRes, mentorshipRes] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "alumni"),
-      supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("is_active", true),
-      supabase.from("mentorship_requests").select("id", { count: "exact", head: true }).eq("student_id", user.id),
-    ])
+    const [alumniRes, opportunitiesRes, mentorshipRes, messagesRes] = await Promise.all([
+  supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "alumni"),
+  supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("is_active", true),
+  supabase.from("mentorship_requests").select("id", { count: "exact", head: true }).eq("student_id", user.id),
+
+  // ✅ ADD THIS
+  supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("receiver_id", user.id)
+    .eq("is_read", false),
+])
 
     alumniCount = alumniRes.count || 0
     opportunitiesCount = opportunitiesRes.count || 0
     mentorshipCount = mentorshipRes.count || 0
+    unreadMessages = messagesRes.count || 0
 
     const { data: alumni } = await supabase
       .from("profiles")
@@ -98,6 +159,8 @@ export default async function DashboardPage() {
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(3)
+
+
 
     recommendedAlumni = (alumni as AlumniWithProfile[]) || []
     latestOpportunities = (opportunities as Opportunity[]) || []
@@ -119,26 +182,43 @@ export default async function DashboardPage() {
   }
 
   if (profile.role === "alumni") {
-  // block unverified alumni
-  if (!profile.is_verified) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-xl font-semibold mb-2">
-          Your account is waiting for verification
-        </h2>
+    // block unverified alumni
+    if (!profile.is_verified) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <h2 className="text-xl font-semibold mb-2">
+            Your account is waiting for verification
+          </h2>
 
-        <p className="text-muted-foreground max-w-md">
-          An admin will review your alumni status soon. You will be able to
-          access the alumni dashboard once your account is verified.
-        </p>
-      </div>
-    )
+          <p className="text-muted-foreground max-w-md">
+            An admin will review your alumni status soon. You will be able to
+            access the alumni dashboard once your account is verified.
+          </p>
+        </div>
+      )
+    }
+
+  
+  return (
+  <AlumniDashboardOverview
+    profile={profile}
+    mentorshipCount={alumniMentorshipCount || 0}
+    opportunitiesCount={postedOpportunitiesCount || 0}
+    pendingCount={pendingMentorshipCount || 0}
+  />
+)
+
   }
 
-  return <AlumniDashboardOverview profile={profile} />
-}
-
-  return <AdminDashboardOverview profile={profile} />
+  return (
+  <AdminDashboardOverview
+    profile={profile}
+    totalUsers={totalUsers}
+    pendingVerification={pendingVerification}
+    activeOpportunities={activeOpportunities}
+    mentorshipsCount={mentorshipsCount}
+  />
+)
 }
 
 function StudentDashboard({
@@ -167,12 +247,12 @@ function StudentDashboard({
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-  title="Active Alumni"
-  value={alumniCount}
-  icon="users"
-  description="Available to connect"
-  variant="primary"
-/>
+          title="Active Alumni"
+          value={alumniCount}
+          icon="users"
+          description="Available to connect"
+          variant="primary"
+        />
         <StatsCard
           title="Open Opportunities"
           value={opportunitiesCount}
@@ -208,7 +288,7 @@ function StudentDashboard({
             {recommendedAlumni.length > 0 ? (
               <div className="space-y-4">
                 {recommendedAlumni.map((alumni) => (
-                  <AlumniCard key={alumni.id} alumni={alumni} />
+                  <AlumniCard key={alumni.id} alumni={alumni} currentUserRole={profile.role} />
                 ))}
               </div>
             ) : (
@@ -257,7 +337,19 @@ function StudentDashboard({
   )
 }
 
-function AlumniDashboardOverview({ profile }: { profile: Profile }) {
+function AlumniDashboardOverview({
+  profile,
+  mentorshipCount,
+  opportunitiesCount,
+  pendingCount,
+  unreadMessages
+}: {
+  profile: Profile
+  mentorshipCount: number
+  opportunitiesCount: number
+  pendingCount: number
+  unreadMessages?: number
+}) {
   return (
     <div className="space-y-6 animate-in-up">
       <div className="space-y-1">
@@ -275,10 +367,10 @@ function AlumniDashboardOverview({ profile }: { profile: Profile }) {
           description="Pending requests"
           variant="primary"
         />
-        <StatsCard title="Active Mentees" value={0} icon="users" description="Students you mentor" variant="success" />
+        <StatsCard title="Active Mentees" value={mentorshipCount} icon="users" description="Students you mentor" variant="success" />
         <StatsCard
           title="Posted Opportunities"
-          value={0}
+          value={opportunitiesCount}
           icon="briefcase"
           description="Jobs & internships"
           variant="info"
@@ -306,7 +398,19 @@ function AlumniDashboardOverview({ profile }: { profile: Profile }) {
   )
 }
 
-function AdminDashboardOverview({ profile }: { profile: Profile }) {
+function AdminDashboardOverview({
+  profile,
+  totalUsers,
+  pendingVerification,
+  activeOpportunities,
+  mentorshipsCount,
+}: {
+  profile: Profile
+  totalUsers: number
+  pendingVerification: number
+  activeOpportunities: number
+  mentorshipsCount: number
+}) {
   return (
     <div className="space-y-6 animate-in-up">
       <div className="space-y-1">
@@ -315,22 +419,22 @@ function AdminDashboardOverview({ profile }: { profile: Profile }) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Total Users" value={0} icon="users" description="Students & alumni" variant="primary" />
+        <StatsCard title="Total Users" value={totalUsers} icon="users" description="Students & alumni" variant="primary" />
         <StatsCard
           title="Pending Verification"
-          value={0}
+          value={pendingVerification}
           icon="shield"
           description="Alumni to verify"
           variant="warning"
         />
         <StatsCard
           title="Active Opportunities"
-          value={0}
+          value={activeOpportunities}
           icon="briefcase"
           description="Jobs & internships"
           variant="success"
         />
-        <StatsCard title="Mentorships" value={0} icon="user-check" description="Active connections" variant="info" />
+        <StatsCard title="Mentorships" value={mentorshipsCount} icon="user-check" description="Active connections" variant="info" />
       </div>
 
       <Card className="overflow-hidden">

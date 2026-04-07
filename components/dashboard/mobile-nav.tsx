@@ -81,7 +81,7 @@ export function MobileNav({ userRole }: MobileNavProps) {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-              <GraduationCap className="h-8 w-8 text-primary" />
+              <GraduationCap className="h-8 w-8 text-black" />
               <span className="text-xl font-bold">AlumniConnect</span>
             </Link>
           </div>

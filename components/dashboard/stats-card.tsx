@@ -2,23 +2,37 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { tr } from "date-fns/locale"
 import {
   Users,
   GraduationCap,
   Briefcase,
   TrendingUp,
   TrendingDown,
+  UserCheck,
+  MessageSquare,
+  School,
+  Shield,
   type LucideIcon,
+  Icon,
 } from "lucide-react"
 
 /* -----------------------------
    ICON MAP (IMPORTANT CHANGE)
 ------------------------------ */
 const iconMap: Record<string, LucideIcon> = {
-  users: Users,
-  graduation: GraduationCap,
-  briefcase: Briefcase,
+  "users": Users,
+  "graduation-cap": GraduationCap,
+  "briefcase": Briefcase,
+  "user-check": UserCheck,
+  "message-square": MessageSquare,
+  "shield": Shield,
+  "trending-up": TrendingUp,
+  "trending-down": TrendingDown,
+  "school": School,
 }
+
+
 
 interface StatsCardProps {
   title: string
@@ -42,11 +56,11 @@ const variantStyles = {
   },
   primary: {
     iconBg: "gradient-primary",
-    iconColor: "text-white",
+    iconColor: "text-foreground",
   },
   success: {
     iconBg: "gradient-success",
-    iconColor: "text-white",
+    iconColor: "text-foreground",
   },
   warning: {
     iconBg: "gradient-warning",
@@ -54,7 +68,7 @@ const variantStyles = {
   },
   info: {
     iconBg: "gradient-info",
-    iconColor: "text-white",
+    iconColor: "text-foreground",
   },
 }
 
@@ -68,6 +82,7 @@ export function StatsCard({
 }: StatsCardProps) {
   const styles = variantStyles[variant]
   const Icon = iconMap[icon]
+  console.log(icon, Icon)
 
   return (
     <Card className="lift-hover shine-hover group overflow-hidden cursor-default">
@@ -85,7 +100,7 @@ export function StatsCard({
           {Icon && (
             <Icon
               className={cn(
-                "h-4 w-4 relative z-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12",
+                "h-4 w-4 relative z-10 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 text-foreground",
                 styles.iconColor,
               )}
             />
@@ -124,24 +139,6 @@ export function StatsCard({
             <span className="text-xs text-muted-foreground font-normal">vs. last month</span>
           </div>
         )}
-      </CardContent>
-    </Card>
-  )
-}
-
-/* -----------------------------
-   SKELETON (UNCHANGED)
------------------------------- */
-export function StatsCardSkeleton() {
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="h-4 w-24 rounded skeleton-shimmer" />
-        <div className="h-9 w-9 rounded-lg skeleton-shimmer" />
-      </CardHeader>
-      <CardContent>
-        <div className="h-8 w-16 rounded skeleton-shimmer" />
-        <div className="mt-2 h-3 w-32 rounded skeleton-shimmer" />
       </CardContent>
     </Card>
   )

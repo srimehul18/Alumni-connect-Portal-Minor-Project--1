@@ -58,7 +58,7 @@ export function OpportunityForm({ userId, opportunity }: OpportunityFormProps) {
     const supabase = createClient()
 
     const opportunityData = {
-      created_by: userId, // ✅ FIXED
+      user_id: userId, // ✅ FIXED
       title: formData.title,
       description: formData.description,
       company: formData.company,

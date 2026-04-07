@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { DashboardHeader } from "@/components/dashboard/header"
 import type { Profile } from "@/lib/types"
-
+import { GraduationCap } from "lucide-react"
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 

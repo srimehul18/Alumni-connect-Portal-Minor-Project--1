@@ -24,8 +24,8 @@ export function AnalyticsCharts({ data, type }: AnalyticsChartsProps) {
             }}
           />
           <Legend />
-          <Bar dataKey="students" name="Students" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="alumni" name="Alumni" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="students" name="Students" fill="hsl(0, 80%, 50%)" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="alumni" name="Alumni" fill="hsl(240, 100%, 50%)" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     )
@@ -45,14 +45,14 @@ export function AnalyticsCharts({ data, type }: AnalyticsChartsProps) {
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
         >
           {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        <Cell key={`cell-${index}`} fill={index === 0 ? "orange" : "green"} />
           ))}
         </Pie>
         <Tooltip
           contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid hsl(var(--border))",
-            borderRadius: "8px",
+        backgroundColor: "hsl(0, 0%, 100%)",
+        border: "1px solid hsl(0, 0%, 0%)",
+        borderRadius: "8px",
           }}
         />
       </PieChart>
