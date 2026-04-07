@@ -17,8 +17,6 @@ import { createClient } from "@/lib/supabase/client"
 import type { Profile, AlumniProfile } from "@/lib/types"
 import { BRANCHES, SKILLS, GRADUATION_YEARS } from "@/lib/constants"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/app/auth/supabaseClient"
-import { toast } from "../ui/use-toast"
 
 interface AlumniProfileFormProps {
   profile: Profile
@@ -93,14 +91,14 @@ export function AlumniProfileForm({ profile, alumniProfile }: AlumniProfileFormP
     const supabase = createClient()
 
     // Update main profile
-    await supabase
-      .from("profiles")
-      .update({
-        full_name: formData.full_name,
-        avatar_url: formData.avatar_url,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", profile.id)
+    // await supabase
+    //   .from("profiles")
+    //   .update({
+    //     full_name: formData.full_name,
+    //     avatar_url: formData.avatar_url,
+    //     updated_at: new Date().toISOString(),
+    //   })
+    //   .eq("id", profile.id)
 
     // Update or create alumni profile
     const alumniData = {
