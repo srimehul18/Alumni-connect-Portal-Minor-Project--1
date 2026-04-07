@@ -277,7 +277,7 @@ export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUse
               isSaved={savedAlumniIds.includes(a.id)}
               onSave={() => handleSave(a.id)}
               onUnsave={() => handleUnsave(a.id)}
-              currentUserRole={currentUserRole}
+              currentUserRole= {currentUserRole}
             />
           ))}
         </div>

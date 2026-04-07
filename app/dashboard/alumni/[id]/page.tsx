@@ -8,7 +8,10 @@ import { Briefcase, GraduationCap, Linkedin, Github, MessageSquare, ArrowLeft, C
 import Link from "next/link"
 import { RequestMentorshipButton } from "@/components/dashboard/request-mentorship-button"
 
-export default async function AlumniProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AlumniProfilePage({ params,
+  
+ }: { 
+  params: { id: string } }) {
   const { id } = await params
   const supabase = await createClient()
 
@@ -23,15 +26,20 @@ export default async function AlumniProfilePage({ params }: { params: Promise<{ 
     .from("profiles")
     .select(`
       *,
-      alumni_profiles (*)
+      alumni_profiles!user_id (*)
     `)
     .eq("id", id)
     .eq("role", "alumni")
     .single()
 
+  const {data: alumniProfile} = await supabase.from("alumni_profiles").select("*").eq("user_id", id).single()
+
+    console.log("Alumni fetch result:", { alumni })
+    console.log("Alumni profile data:", alumniProfile)
+
   if (!alumni) notFound()
 
-  const alumniProfile = alumni.alumni_profiles?.[0]
+
 
   // Check if mentorship already requested
   const { data: existingRequest } = await supabase
@@ -125,7 +133,7 @@ export default async function AlumniProfilePage({ params }: { params: Promise<{ 
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {alumniProfile.skills.map((skill) => (
+                  {alumniProfile.skills.map((skill: string) => (
                     <Badge key={skill} variant="secondary">
                       {skill}
                     </Badge>
@@ -142,7 +150,7 @@ export default async function AlumniProfilePage({ params }: { params: Promise<{ 
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {alumniProfile.expertise_areas.map((area) => (
+                  {alumniProfile.expertise_areas.map((area: string) => (
                     <Badge key={area} variant="outline">
                       {area}
                     </Badge>
@@ -180,7 +188,7 @@ export default async function AlumniProfilePage({ params }: { params: Promise<{ 
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {alumniProfile.mentorship_areas.map((area) => (
+                  {alumniProfile.mentorship_areas.map((area: string) => (
                     <Badge key={area} variant="secondary">
                       {area}
                     </Badge>

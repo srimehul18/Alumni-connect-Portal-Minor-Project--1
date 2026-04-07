@@ -20,7 +20,7 @@ interface AlumniCardProps {
   isSaved?: boolean
   onSave?: () => void
   onUnsave?: () => void
-  currentUserRole?: string
+  currentUserRole: string
 }
 
 export function AlumniCard({ alumni, isSaved, onSave, onUnsave, currentUserRole }: AlumniCardProps) {
@@ -298,7 +298,7 @@ export function AlumniCard({ alumni, isSaved, onSave, onUnsave, currentUserRole 
           </Dialog>
 
           {/* NEW: Mentorship Request Button */}
-          {alumniProfile?.is_mentor_available && (
+          {currentUserRole === "student" && alumniProfile?.is_mentor_available && (
             <Button
               variant="default"
               size="sm"
