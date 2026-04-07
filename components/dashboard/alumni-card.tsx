@@ -20,9 +20,10 @@ interface AlumniCardProps {
   isSaved?: boolean
   onSave?: () => void
   onUnsave?: () => void
+  currentUserRole?: string
 }
 
-export function AlumniCard({ alumni, isSaved, onSave, onUnsave }: AlumniCardProps) {
+export function AlumniCard({ alumni, isSaved, onSave, onUnsave, currentUserRole }: AlumniCardProps) {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
   const [isRequesting, setIsRequesting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -190,7 +191,7 @@ export function AlumniCard({ alumni, isSaved, onSave, onUnsave }: AlumniCardProp
               )}
             </div>
           )}
-          {alumniProfile?.is_mentor_available && (
+          {currentUserRole === "student" && alumniProfile?.is_mentor_available && (
             <Badge className="mt-3 gap-1 glow-pulse" variant="default">
               <Sparkles className="h-3 w-3 animate-pulse" />
               Open to Mentor

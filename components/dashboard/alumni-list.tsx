@@ -21,6 +21,7 @@ interface AlumniListProps {
   alumni: AlumniWithProfile[]
   savedAlumniIds: string[]
   currentUserId: string
+  currentUserRole: string
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -34,7 +35,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUserId }: AlumniListProps) {
+export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUserId, currentUserRole }: AlumniListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBranch, setSelectedBranch] = useState<string>("all")
   const [selectedYear, setSelectedYear] = useState<string>("all")
@@ -276,6 +277,7 @@ export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUse
               isSaved={savedAlumniIds.includes(a.id)}
               onSave={() => handleSave(a.id)}
               onUnsave={() => handleUnsave(a.id)}
+              currentUserRole={currentUserRole}
             />
           ))}
         </div>
