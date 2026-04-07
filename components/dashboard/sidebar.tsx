@@ -32,6 +32,7 @@ interface SidebarProps {
 
 const studentNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {href: "/dashboard/community", label: "Community", icon: MessageSquare},
   { href: "/dashboard/alumni", label: "Discover Alumni", icon: Users },
   { href: "/dashboard/opportunities", label: "Opportunities", icon: Briefcase },
   { href: "/dashboard/saved", label: "Saved Alumni", icon: Bookmark },
