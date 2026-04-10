@@ -11,13 +11,24 @@ export default async function AlumniPage() {
 
   if (!user) redirect("/auth/login")
 
-  // Fetch all verified alumni with their profiles
-  const { data: alumni } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("role", "alumni")
-    .eq("is_verified", true)
-    .order("created_at", { ascending: false })
+// Fetch all verified alumni with their profiles
+const { data: alumni, error } = await supabase
+.from("profiles")
+.select(`
+  *,
+  alumni_profiles!left (
+    branch,
+    graduation_year,
+    company,
+    job_title,
+    skills,
+    is_mentor_available
+  )
+`)
+.eq("role", "alumni")
+.eq("is_verified", true)
+.order("created_at", { ascending: false })
+
 
   // Fetch saved alumni for current user
   const { data: savedAlumni } = await supabase.from("saved_alumni").select("alumni_id").eq("student_id", user.id)

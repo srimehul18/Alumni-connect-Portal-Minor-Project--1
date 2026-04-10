@@ -48,7 +48,9 @@ export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUse
 
   const filteredAlumni = useMemo(() => {
     return alumni.filter((a) => {
-      const profile = a.alumni_profiles?.[0]
+      const profile = Array.isArray(a.alumni_profiles)
+        ? a.alumni_profiles[0]
+        : a.alumni_profiles
 
       if (debouncedSearch) {
         const query = debouncedSearch.toLowerCase()
@@ -277,7 +279,7 @@ export function AlumniList({ alumni, savedAlumniIds: initialSavedIds, currentUse
               isSaved={savedAlumniIds.includes(a.id)}
               onSave={() => handleSave(a.id)}
               onUnsave={() => handleUnsave(a.id)}
-              currentUserRole= {currentUserRole}
+              currentUserRole={currentUserRole}
             />
           ))}
         </div>
