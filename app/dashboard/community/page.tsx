@@ -14,6 +14,7 @@ export default function CommunityPage() {
 
     const [posts, setPosts] = useState<any[]>([])
     const [content, setContent] = useState("")
+    const [image, setImage] = useState<File | null>(null)
 
     // ✅ FETCH POSTS
     const fetchPosts = async () => {
@@ -40,49 +41,26 @@ export default function CommunityPage() {
         fetchPosts()
     }, [])
 
-    // ✅ CREATE POST
     const handlePost = async () => {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-        if (!user || !content.trim()) return
+  if (!user || !content.trim()) return
 
-        await supabase.from("community_posts").insert({
-            user_id: user.id,
-            content,
-        })
+  const { error } = await supabase.from("community_posts").insert({
+    user_id: user.id,
+    content,
+  })
 
-        setContent("")
-        fetchPosts()
-    }
+  if (error) {
+    console.error(error)
+    return
+  }
 
-    // ✅ TOGGLE POST LIKE
-    const togglePostLike = async (postId: string) => {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
-
-        if (!user) return
-
-        const { data: existing } = await supabase
-            .from("community_likes")
-            .select("id")
-            .eq("post_id", postId)
-            .eq("user_id", user.id)
-            .maybeSingle()
-
-        if (existing) {
-            await supabase.from("community_likes").delete().eq("id", existing.id)
-        } else {
-            await supabase.from("community_likes").insert({
-                post_id: postId,
-                user_id: user.id,
-            })
-        }
-
-        fetchPosts()
-    }
+  setContent("")
+  fetchPosts()
+}
 
     // ✅ TOGGLE COMMENT LIKE
     const toggleCommentLike = async (commentId: string) => {
@@ -115,6 +93,36 @@ export default function CommunityPage() {
 
         fetchPosts()
     }
+    const togglePostLike = async (postId: string) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  const { data: existing } = await supabase
+    .from("community_likes")
+    .select("id")
+    .eq("post_id", postId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (existing) {
+    await supabase
+      .from("community_likes")
+      .delete()
+      .eq("id", existing.id)
+  } else {
+    await supabase
+      .from("community_likes")
+      .insert({
+        post_id: postId,
+        user_id: user.id,
+      })
+  }
+
+  fetchPosts()
+}
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -132,6 +140,7 @@ export default function CommunityPage() {
                             className="min-h-[80px] resize-none border-none focus-visible:ring-0"
                         />
 
+
                         <div className="flex justify-end">
                             <Button onClick={handlePost} className="rounded-full px-6">
                                 Post
@@ -147,24 +156,32 @@ export default function CommunityPage() {
                         <CardContent className="pt-4 space-y-3">
 
                             {/* USER */}
-
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center justify-center font-bold">
-                                        {post.profiles?.full_name?.charAt(0) || "U"}
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-semibold">
-                                            {post.profiles?.full_name || "User"}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(post.created_at).toLocaleString()}
-                                        </p>
-                                    </div>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center justify-center font-bold">
+                                    {post.profiles?.full_name?.charAt(0) || "U"}
                                 </div>
-                            
+
+                                <div>
+                                    <p className="text-sm font-semibold">
+                                        {post.profiles?.full_name || "User"}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {new Date(post.created_at).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+
                             {/* CONTENT */}
                             <p className="text-sm">{post.content}</p>
+
+                            {/* 🔥 IMAGE DISPLAY */}
+                            {post.image_url && (
+                                <img
+                                    src={post.image_url}
+                                    alt="post"
+                                    className="rounded-lg mt-2 max-h-80 w-full object-cover"
+                                />
+                            )}
 
                             {/* POST LIKE */}
                             <Button
