@@ -70,14 +70,18 @@ export function StudentProfileForm({ profile, studentProfile }: StudentProfileFo
     const supabase = createClient()
 
     // Update main profile
-    await supabase
-      .from("profiles")
-      .update({
-        full_name: formData.full_name,
-        avatar_url: formData.avatar_url,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", profile.id)
+    const { error: profileError } = await supabase
+  .from("profiles")
+  .update({
+    full_name: formData.full_name,
+    avatar_url: formData.avatar_url,
+    updated_at: new Date().toISOString(),
+  })
+  .eq("id", profile.id)
+
+if (profileError) {
+  console.error("PROFILE UPDATE ERROR:", profileError)
+}
 
     // Update or create student profile
     const studentData = {
@@ -94,11 +98,16 @@ export function StudentProfileForm({ profile, studentProfile }: StudentProfileFo
       updated_at: new Date().toISOString(),
     }
 
-    if (studentProfile) {
-      await supabase.from("student_profiles").update(studentData).eq("id", studentProfile.id)
-    } else {
-      await supabase.from("student_profiles").insert(studentData)
-    }
+    const { error } = await supabase
+  .from("student_profiles")
+  .upsert(studentData, { onConflict: "user_id" })
+
+if (error) {
+  console.error("Student profile error:", error)
+  alert("Error saving profile ❌")
+  setIsLoading(false)
+  return
+}
 
     setIsLoading(false)
     router.refresh()
