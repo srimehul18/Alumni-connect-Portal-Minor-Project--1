@@ -36,6 +36,7 @@ export default async function DashboardPage() {
 
   // If database error, show setup message
 
+
   if (!profile) {
     redirect("/auth/complete-profile")
   }

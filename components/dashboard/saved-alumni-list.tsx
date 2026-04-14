@@ -55,8 +55,7 @@ export function SavedAlumniList({ alumni: initialAlumni, currentUserId }: SavedA
           key={a.id}
           alumni={a}
           isSaved
-          onUnsave={() => handleUnsave(a.id)}
-        />
+          onUnsave={() => handleUnsave(a.id)} currentUserRole={""}        />
       ))}
     </div>
   )
