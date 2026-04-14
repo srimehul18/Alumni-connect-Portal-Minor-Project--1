@@ -41,11 +41,7 @@ export default function SignUpPage() {
     }
 
 
-    const role =
-  document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("selectedRole="))
-    ?.split("=")[1] || "student"
+    const role = localStorage.getItem("selectedRole") || "student"
 
     try {
       const { data, error } = await supabase.auth.signUp({
